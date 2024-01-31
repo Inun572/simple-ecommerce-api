@@ -5,7 +5,7 @@ class Product extends BaseService {
   model = Prisma.ModelName.products;
 
   async findMany(ids) {
-    return await prisma.products.findMany({
+    return await this.prisma.products.findMany({
       where: {
         id: {
           in: ids,
