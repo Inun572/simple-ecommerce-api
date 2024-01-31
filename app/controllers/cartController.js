@@ -5,6 +5,12 @@ const cartController = {
   getCart: async (req, res) => {
     try {
       const data = await Cart.get();
+
+      if (data.length === 0) {
+        return res.json({
+          message: 'Cart is empty',
+        });
+      }
       const totalItems = data.length;
       const totalPrice = Number(
         data
@@ -87,12 +93,13 @@ const cartController = {
         const newTotal = newQuantity * isExist.price;
 
         const data = await Cart.store({
+          cartId: isInCart.id,
           productId,
           newQuantity,
           newTotal,
         });
         return res.json({
-          message: 'success add to cart',
+          message: 'success update item in cart',
           data,
         });
       }
@@ -114,10 +121,24 @@ const cartController = {
       });
     }
   },
+
+  emptyCart: async (req, res) => {
+    try {
+      await Cart.emptyCart();
+      res.json({
+        message: 'success empty cart',
+      });
+    } catch (err) {
+      res.status(500).json({
+        message: 'Internal server error',
+      });
+    }
+  },
 };
 
 module.exports = {
   getCart: cartController.getCart,
   getCartById: cartController.getCartById,
   addItem: cartController.addItem,
+  emptyCart: cartController.emptyCart,
 };

@@ -3,6 +3,7 @@ const { Prisma } = require('@prisma/client');
 
 class Cart extends BaseService {
   model = Prisma.ModelName.cart;
+  relations = ['products'];
 
   async find(id) {
     return await this.prisma[this.model].findFirst({
@@ -14,6 +15,7 @@ class Cart extends BaseService {
 
   async store(data) {
     const {
+      cartId,
       productId,
       quantity,
       total,
@@ -22,7 +24,7 @@ class Cart extends BaseService {
     } = data;
     return await this.prisma[this.model].upsert({
       where: {
-        product_id: productId,
+        id: cartId || 0,
       },
       create: {
         product_id: productId,
@@ -47,6 +49,13 @@ class Cart extends BaseService {
         total,
       },
     });
+  }
+
+  async deleteItem(data) {
+    const { productId } = data;
+  }
+  async emptyCart() {
+    return await this.prisma[this.model].deleteMany();
   }
 }
 
