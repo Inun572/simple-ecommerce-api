@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model cart {
+  id         Int      @id @default(autoincrement())
+  product_id Int
+  quantity   Int      @default(1)
+  total      Float    @default(0) @db.Float
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @updatedAt
+  products   products @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "cart_ibfk_1")
+
+  @@index([product_id], map: "product_id")
+}
+
+model order_items {
+  id         Int      @id @default(autoincrement())
+  order_id   Int
+  product_id Int
+  quantity   Int      @default(1)
+  price      Float    @default(0) @db.Float
+  total      Float    @default(0) @db.Float
+  created_at DateTime @default(now()) @db.Timestamp(0)
+  updated_at DateTime @default(now()) @db.Timestamp(0)
+  orders     orders   @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "order_items_ibfk_1")
+  products   products @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "order_items_ibfk_2")
+
+  @@index([order_id], map: "order_id")
+  @@index([product_id], map: "product_id")
+}
+
+model orders {
+  id          Int           @id @default(autoincrement())
+  date        DateTime      @default(now()) @db.DateTime(0)
+  number      String        @db.VarChar(255)
+  total       Float         @default(0) @db.Float
+  created_at  DateTime      @default(now()) @db.Timestamp(0)
+  updated_at  DateTime      @default(now()) @db.Timestamp(0)
+  order_items order_items[]
+}
+
+model products {
+  id          Int           @id @default(autoincrement())
+  name        String        @db.VarChar(255)
+  category    String        @db.VarChar(255)
+  price       Float         @default(0) @db.Float
+  in_stock    Boolean       @default(dbgenerated("(true)"))
+  description String?       @db.Text
+  created_at  DateTime      @default(now()) @db.Timestamp(0)
+  updated_at  DateTime      @default(now()) @db.Timestamp(0)
+  cart        cart[]
+  order_items order_items[]
+}
